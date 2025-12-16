@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual DJ - AI-Powered Mobile DJ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .phone-frame {
+            max-width: 390px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 40px;
+            padding: 20px 15px;
+            box-shadow: 0 20px 60px rgba(0, 255, 0, 0.3);
+            border: 3px solid #1a1a1a;
+        }
+
+        .screen {
+            background: #0a0a0a;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 844px;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #1a1a1a;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Now Playing */
+        .now-playing {
+            padding: 30px 20px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .vinyl-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .vinyl {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: spin 3s linear infinite;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .vinyl-grooves {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .vinyl-groove {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #2a2a2a;
+            border-radius: 50%;
+        }
+
+        .vinyl-label {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #0a0a0a;
+            border: 2px solid #00ff00;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .vinyl-label-text {
+            font-size: 12px;
+            font-weight: 900;
+            color: #00ff00;
+            letter-spacing: 2px;
+        }
+
+        .track-info {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .track-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .artist-name {
+            font-size: 16px;
+            color: #888;
+        }
+
+        /* Waveform */
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            background: #0f0f0f;
+            border-radius: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            position: relative;
+        }
+
+        .waveform-bar {
+            width: 4px;
+            margin: 0 1px;
+            background: #00ff0066;
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .waveform-bar:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+        @keyframes wave {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .playhead {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #00ff00;
+            left: 50%;
+        }
+
+        /* Track Details */
+        .track-details {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .detail-box {
+            background: #1a1a1a;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            color: #00ff00;
+            font-weight: 700;
+        }
+
+        /* Energy Meter */
+        .energy-meter {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .energy-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .energy-bars {
+            display: flex;
+            height: 30px;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .energy-bar {
+            flex: 1;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .energy-bar.active {
+            background: #00ff00;
+        }
+
+        .energy-value {
+            text-align: right;
+            color: #00ff00;
+            font-weight: 700;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .control-btn {
+            background: #333;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: none;
+            color: #fff;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            background: #00ff00;
+            color: #000;
+            font-size: 32px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        /* DJ Mode Button */
+        .dj-mode-btn {
+            margin: 20px;
+            padding: 20px;
+            background: #00ff0022;
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dj-mode-btn:active {
+            transform: scale(0.98);
+        }
+
+        .dj-mode-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .dj-mode-text {
+            font-size: 16px;
+            color: #00ff00;
+            font-weight: 700;
+        }
+
+        .dj-mode-subtext {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Queue */
+        .queue {
+            padding: 20px;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .queue-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+
+        .queue-info {
+            flex: 1;
+        }
+
+        .queue-track {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .queue-artist {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .queue-bpm {
+            font-size: 12px;
+            color: #00ff00;
+            font-weight: 700;
+        }
+
+        .compatibility {
+            background: #00ff0022;
+            border: 1px solid #00ff00;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            color: #00ff00;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+
+        /* Bottom Actions */
+        .bottom-actions {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .phone-frame {
+                margin: 0;
+                border-radius: 0;
+                padding: 0;
+                border: none;
+            }
+
+            .screen {
+                border-radius: 0;
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">🎵 VIRTUAL DJ</div>
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span id="status-text">AI DJ ACTIVE</span>
+                </div>
+            </div>
+
+            <!-- Now Playing -->
+            <div class="now-playing">
+                <div class="section-title">NOW PLAYING</div>
+
+                <!-- Vinyl -->
+                <div class="vinyl-container">
+                    <div class="vinyl" id="vinyl">
+                        <div class="vinyl-grooves">
+                            <div class="vinyl-groove" style="width: 200px; height: 200px;"></div>
+                            <div class="vinyl-groove" style="width: 180px; height: 180px;"></div>
+                            <div class="vinyl-groove" style="width: 160px; height: 160px;"></div>
+                            <div class="vinyl-groove" style="width: 140px; height: 140px;"></div>
+                            <div class="vinyl-groove" style="width: 120px; height: 120px;"></div>
+                        </div>
+                        <div class="vinyl-label">
+                            <span class="vinyl-label-text">VIRTUAL</span>
+                            <span class="vinyl-label-text">DJ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Track Info -->
+                <div class="track-info">
+                    <div class="track-title" id="track-name">Blinding Lights</div>
+                    <div class="artist-name" id="artist-name">The Weeknd</div>
+                </div>
+
+                <!-- Waveform -->
+                <div class="waveform" id="waveform">
+                    <!-- Generated by JS -->
+                    <div class="playhead"></div>
+                </div>
+
+                <!-- Track Details -->
+                <div class="track-details">
+                    <div class="detail-box">
+                        <div class="detail-label">BPM</div>
+                        <div class="detail-value" id="bpm">171</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">KEY</div>
+                        <div class="detail-value" id="key">C</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">TIME</div>
+                        <div class="detail-value" id="time">2:45</div>
+                    </div>
+                </div>
+
+                <!-- Energy Meter -->
+                <div class="energy-meter">
+                    <div class="energy-label">ENERGY</div>
+                    <div class="energy-bars" id="energy-bars">
+                        <!-- Generated by JS -->
+                    </div>
+                    <div class="energy-value" id="energy-value">85/100</div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" onclick="previousTrack()">⏮</button>
+                <button class="control-btn play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+                <button class="control-btn" onclick="nextTrack()">⏭</button>
+            </div>
+
+            <!-- DJ Mode -->
+            <div class="dj-mode-btn" id="dj-mode" onclick="toggleDJMode()">
+                <div class="dj-mode-icon">🎧</div>
+                <div class="dj-mode-text">AI DJ MODE: ON</div>
+                <div class="dj-mode-subtext">Automatic mixing active</div>
+            </div>
+
+            <!-- Queue -->
+            <div class="queue">
+                <div class="section-title">UP NEXT</div>
+
+                <div class="queue-item">
+                    <div class="queue-number">1</div>
+                    <div class="queue-info">
+                        <div class="queue-track">Levitating</div>
+                        <div class="queue-artist">Dua Lipa</div>
+                    </div>
+                    <div class="queue-bpm">103 BPM</div>
+                    <div class="compatibility">95%</div>
+                </div>
+
+                <div class="queue-item">
+                    <div class="queue-number">2</div>
+                    <div class="queue-info">
+                        <div class="queue-track">Uptown Funk</div>
+                        <div class="queue-artist">Mark Ronson ft. Bruno Mars</div>
+                    </div>
+                    <div class="queue-bpm">115 BPM</div>
+                    <div class="compatibility">92%</div>
+                </div>
+
+                <div class="queue-item">
+                    <div class="queue-number">3</div>
+                    <div class="queue-info">
+                        <div class="queue-track">Don't Start Now</div>
+                        <div class="queue-artist">Dua Lipa</div>
+                    </div>
+                    <div class="queue-bpm">124 BPM</div>
+                    <div class="compatibility">89%</div>
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="bottom-actions">
+                <button class="action-btn" onclick="alert('Loading sample playlist...')">Load Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample tracks
+        const tracks = [
+            { name: 'Blinding Lights', artist: 'The Weeknd', bpm: 171, key: 'C', energy: 85 },
+            { name: 'Levitating', artist: 'Dua Lipa', bpm: 103, key: 'D', energy: 80 },
+            { name: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', bpm: 115, key: 'G', energy: 82 },
+            { name: "Don't Start Now", artist: 'Dua Lipa', bpm: 124, key: 'D', energy: 83 }
+        ];
+
+        let currentTrackIndex = 0;
+        let isPlaying = true;
+        let isDJMode = true;
+
+        // Generate waveform
+        const waveform = document.getElementById('waveform');
+        for (let i = 0; i < 50; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'waveform-bar';
+            bar.style.height = Math.random() * 60 + 20 + 'px';
+            waveform.insertBefore(bar, waveform.firstChild);
+        }
+
+        // Generate energy bars
+        function updateEnergyMeter(energy) {
+            const energyBars = document.getElementById('energy-bars');
+            energyBars.innerHTML = '';
+            const filled = Math.floor(energy / 10);
+
+            for (let i = 0; i < 10; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'energy-bar' + (i < filled ? ' active' : '');
+                energyBars.appendChild(bar);
+            }
+        }
+
+        // Update track display
+        function updateTrack() {
+            const track = tracks[currentTrackIndex];
+            document.getElementById('track-name').textContent = track.name;
+            document.getElementById('artist-name').textContent = track.artist;
+            document.getElementById('bpm').textContent = track.bpm;
+            document.getElementById('key').textContent = track.key;
+            document.getElementById('energy-value').textContent = track.energy + '/100';
+            updateEnergyMeter(track.energy);
+        }
+
+        // Toggle play/pause
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const playBtn = document.getElementById('play-btn');
+            const vinyl = document.getElementById('vinyl');
+
+            if (isPlaying) {
+                playBtn.textContent = '⏸';
+                vinyl.style.animationPlayState = 'running';
+            } else {
+                playBtn.textContent = '▶';
+                vinyl.style.animationPlayState = 'paused';
+            }
+        }
+
+        // Next track
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            updateTrack();
+        }
+
+        // Previous track
+        function previousTrack() {
+            currentTrackIndex = currentTrackIndex - 1;
+            if (currentTrackIndex < 0) currentTrackIndex = tracks.length - 1;
+            updateTrack();
+        }
+
+        // Toggle DJ Mode
+        function toggleDJMode() {
+            isDJMode = !isDJMode;
+            const djModeBtn = document.getElementById('dj-mode');
+            const statusText = document.getElementById('status-text');
+
+            if (isDJMode) {
+                djModeBtn.style.background = '#00ff0022';
+                djModeBtn.style.borderColor = '#00ff00';
+                djModeBtn.querySelector('.dj-mode-text').style.color = '#00ff00';
+                djModeBtn.querySelector('.dj-mode-text').textContent = 'AI DJ MODE: ON';
+                statusText.textContent = 'AI DJ ACTIVE';
+            } else {
+                djModeBtn.style.background = '#1a1a1a';
+                djModeBtn.style.borderColor = '#2a2a2a';
+                djModeBtn.querySelector('.dj-mode-text').style.color = '#888';
+                djModeBtn.querySelector('.dj-mode-text').textContent = 'START AI DJ MODE';
+                statusText.textContent = 'MANUAL MODE';
+            }
+        }
+
+        // Initialize
+        updateTrack();
+        updateEnergyMeter(85);
+
+        // Simulate time update
+        let minutes = 2;
+        let seconds = 45;
+        setInterval(() => {
+            seconds++;
+            if (seconds >= 60) {
+                seconds = 0;
+                minutes++;
+            }
+            document.getElementById('time').textContent =
+                minutes + ':' + seconds.toString().padStart(2, '0');
+        }, 1000);
+    </script>
+</body>
+</html>
